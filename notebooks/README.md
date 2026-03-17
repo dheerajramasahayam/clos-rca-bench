@@ -2,7 +2,10 @@
 
 This folder is reserved for exploratory and presentation-friendly notebooks that complement the scripted pipeline.
 
-Suggested notebook split:
+Included notebook:
+- `closrca_bench_demo.ipynb`: reviewer-friendly walkthrough of the benchmark snapshot, leaderboard, sample windows, and core figure assets
+
+Suggested future notebook split:
 - `01_eda.ipynb`: telemetry profiling, class balance, and fault signatures
 - `02_anomaly_comparison.ipynb`: LSTM vs Transformer training curves and threshold analysis
 - `03_rca_error_analysis.ipynb`: RCA confusion patterns and remediation review
