@@ -4,7 +4,7 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](requirements.txt)
 [![GitHub release](https://img.shields.io/github/v/release/dheerajramasahayam/clos-rca-bench)](https://github.com/dheerajramasahayam/clos-rca-bench/releases)
 [![Reproducibility](https://img.shields.io/badge/Reproducibility-fixed%20splits%20%26%20public%20scripts-0f766e)](benchmark_protocol/README.md)
-[![DOI pending](https://img.shields.io/badge/DOI-pending-orange)](#zenodo-and-doi)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19059194.svg)](https://doi.org/10.5281/zenodo.19059194)
 
 ClosRCA-Bench is a maintained public research artifact for topology-grounded datacenter root-cause analysis. The benchmark turns Cisco's public Clos-topology telemetry scenarios into fixed graph windows for anomaly detection, cause classification, target-device localization, and counterfactual remediation validation, with a specific emphasis on hidden-target cases where the failing device is not directly monitored.
 
@@ -169,4 +169,6 @@ The older synthetic and Cisco event-window experiments are still available and n
 
 ## Zenodo and DOI
 
-`.zenodo.json` is included and the repository is now versioned for archival releases. Once the GitHub repository is connected to Zenodo and `v0.1.0` is archived, replace the temporary DOI badge with the minted Zenodo DOI badge.
+The archived Zenodo record for this artifact is [10.5281/zenodo.19059194](https://doi.org/10.5281/zenodo.19059194). The DOI was verified against the Zenodo API record for this title on March 17, 2026.
+
+If you cite the released benchmark artifact, prefer the DOI-backed Zenodo record above in addition to the repository URL.

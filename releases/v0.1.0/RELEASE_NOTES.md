@@ -26,4 +26,4 @@ python3 scripts/run_evaluation.py --suite topology-benchmark
 ## Notes
 
 - Code is released under MIT; source data remains subject to upstream repository terms.
-- `.zenodo.json` is included so this release can be archived in Zenodo once repository-to-Zenodo linkage is enabled.
+- Zenodo DOI for this release: [10.5281/zenodo.19059194](https://doi.org/10.5281/zenodo.19059194).

@@ -6,6 +6,7 @@ ClosRCA-Bench is an open benchmark for topology-grounded root-cause analysis, hi
 
 - Repository: [github.com/dheerajramasahayam/clos-rca-bench](https://github.com/dheerajramasahayam/clos-rca-bench)
 - Latest release: [v0.1.0](https://github.com/dheerajramasahayam/clos-rca-bench/releases/tag/v0.1.0)
+- DOI: [10.5281/zenodo.19059194](https://doi.org/10.5281/zenodo.19059194)
 - Benchmark card: [dataset/cisco_topology_benchmark/BENCHMARK_CARD.md](https://github.com/dheerajramasahayam/clos-rca-bench/blob/main/dataset/cisco_topology_benchmark/BENCHMARK_CARD.md)
 - Protocol: [benchmark_protocol/README.md](https://github.com/dheerajramasahayam/clos-rca-bench/blob/main/benchmark_protocol/README.md)
 - Paper PDF: [paper.pdf](https://github.com/dheerajramasahayam/clos-rca-bench/blob/main/paper.pdf)
