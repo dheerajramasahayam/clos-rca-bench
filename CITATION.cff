@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "ClosRCA-Bench: An Open Topology-Grounded Benchmark and Counterfactual Recovery Framework for Self-Healing Datacenter Networks"
+message: "If you use this benchmark, code, or paper, please cite the repository and the manuscript."
+type: software
+authors:
+  - family-names: "Ramasahayam"
+    given-names: "Dheeraj"
+repository-code: "https://github.com/dheerajramasahayam/clos-rca-bench"
+abstract: "Public benchmark, topology-aware RCA code, and counterfactual remediation validation artifacts for self-healing datacenter networks."
+keywords:
+  - "root cause analysis"
+  - "datacenter networks"
+  - "graph neural networks"
+  - "benchmark dataset"
+  - "network telemetry"
+license: "SEE SOURCE DATA LICENSE"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Ramasahayam"
+      given-names: "Dheeraj"
+  title: "ClosRCA-Bench: An Open Topology-Grounded Benchmark and Counterfactual Recovery Framework for Self-Healing Datacenter Networks"
+  year: 2026

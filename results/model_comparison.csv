@@ -1,0 +1,4 @@
+Dataset,Model,Accuracy,Precision,Recall,F1,FalsePositiveRate
+Synthetic,LSTM,1.0,1.0,1.0,1.0,0.0
+Synthetic,Transformer,1.0,1.0,1.0,1.0,0.0
+GoogleClusterTrace,LSTM,0.9986022364217252,0.9961832061068703,0.9775280898876404,0.9867674858223062,0.0002109259649862898

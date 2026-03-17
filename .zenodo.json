@@ -1,0 +1,18 @@
+{
+  "title": "ClosRCA-Bench: An Open Topology-Grounded Benchmark and Counterfactual Recovery Framework for Self-Healing Datacenter Networks",
+  "upload_type": "software",
+  "description": "Public benchmark artifacts, topology-aware RCA baselines, and counterfactual remediation validation for self-healing datacenter networks.",
+  "creators": [
+    {
+      "name": "Ramasahayam, Dheeraj",
+      "affiliation": "Independent Researcher"
+    }
+  ],
+  "keywords": [
+    "datacenter networks",
+    "root cause analysis",
+    "benchmark",
+    "network telemetry",
+    "graph neural networks"
+  ]
+}

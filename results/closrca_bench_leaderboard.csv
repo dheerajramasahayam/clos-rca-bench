@@ -1,0 +1,17 @@
+Benchmark,Task,Model,PrimaryMetric,Score
+ClosRCA-Bench,AnomalyDetection,RandomForest,F1,0.96875
+ClosRCA-Bench,AnomalyDetection,MLP,F1,0.84375
+ClosRCA-Bench,AnomalyDetection,STGNN-Full,F1,0.8181818181818182
+ClosRCA-Bench,AnomalyDetection,STGNN-NoTopology,F1,0.7931034482758621
+ClosRCA-Bench,AnomalyDetection,STGNN-NoTemporal,F1,0.7931034482758621
+ClosRCA-Bench,CauseClassification,RandomForest,F1Weighted,0.9706589706589707
+ClosRCA-Bench,CauseClassification,MLP,F1Weighted,0.9706589706589707
+ClosRCA-Bench,CauseClassification,STGNN-Full,F1Weighted,0.9531986531986532
+ClosRCA-Bench,CauseClassification,STGNN-NoTopology,F1Weighted,0.9523809523809524
+ClosRCA-Bench,CauseClassification,STGNN-NoTemporal,F1Weighted,0.9531986531986532
+ClosRCA-Bench,TargetLocalization,RandomForest,F1Weighted,1.0
+ClosRCA-Bench,TargetLocalization,MLP,F1Weighted,0.9702149702149702
+ClosRCA-Bench,TargetLocalization,STGNN-Full,F1Weighted,0.837973137973138
+ClosRCA-Bench,TargetLocalization,STGNN-NoTopology,F1Weighted,0.6565656565656565
+ClosRCA-Bench,TargetLocalization,STGNN-NoTemporal,F1Weighted,0.6645768025078369
+ClosRCA-Bench,CounterfactualRecovery,STGNN-Full+SafetyGate,RecoverySuccessRate,0.8181818181818182
