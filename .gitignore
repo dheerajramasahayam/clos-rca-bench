@@ -6,6 +6,7 @@ results/*.pth
 results/*.joblib
 results/real/*.pth
 results/real/*.joblib
+releases/**/*.zip
 
 dataset/X.npy
 dataset/y_anomaly.npy

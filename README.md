@@ -1,6 +1,45 @@
 # ClosRCA-Bench
 
-ClosRCA-Bench is an open, topology-grounded benchmark for datacenter root-cause analysis, target localization, and remediation validation. The repo is structured as a public benchmark release intended for GitHub publication at [github.com/dheerajramasahayam/clos-rca-bench](https://github.com/dheerajramasahayam/clos-rca-bench).
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](requirements.txt)
+[![GitHub release](https://img.shields.io/github/v/release/dheerajramasahayam/clos-rca-bench)](https://github.com/dheerajramasahayam/clos-rca-bench/releases)
+[![Reproducibility](https://img.shields.io/badge/Reproducibility-fixed%20splits%20%26%20public%20scripts-0f766e)](benchmark_protocol/README.md)
+[![DOI pending](https://img.shields.io/badge/DOI-pending-orange)](#zenodo-and-doi)
+
+ClosRCA-Bench is a maintained public research artifact for topology-grounded datacenter root-cause analysis. The benchmark turns Cisco's public Clos-topology telemetry scenarios into fixed graph windows for anomaly detection, cause classification, target-device localization, and counterfactual remediation validation, with a specific emphasis on hidden-target cases where the failing device is not directly monitored.
+
+## Why hidden-target RCA matters
+
+Real network incidents do not always surface on the device that ultimately needs repair. In ClosRCA-Bench, `leaf3` and `spine4-3464` are intentionally retained as hidden-target labels even though they are not directly observed in the monitored subset. That forces benchmarked systems to reason over topology and symptom propagation instead of simply memorizing direct telemetry signatures.
+
+![Cisco Clos benchmark topology](graphs/cisco_clos_topology.png)
+
+## Reproduce Table 1 and Table 2
+
+Table 1 in the manuscript (`Benchmark Summary`) comes from the benchmark construction outputs and snapshot metadata:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 scripts/build_dataset.py --dataset topology-benchmark
+python3 scripts/prepare_release_assets.py --version v0.1.0
+```
+
+Table 2 in the manuscript (`Held-Out Benchmark Performance`) comes from the canonical benchmark training and evaluation runs:
+
+```bash
+python3 scripts/train_pipeline.py --pipeline topology-benchmark
+python3 scripts/run_evaluation.py --suite topology-benchmark
+```
+
+## Example outputs
+
+- Sample dataset artifact: [`examples/closrca_bench_sample_windows.csv`](examples/closrca_bench_sample_windows.csv)
+- Benchmark snapshot: [`examples/closrca_bench_snapshot.json`](examples/closrca_bench_snapshot.json)
+- Leaderboard CSV: [`results/closrca_bench_leaderboard.csv`](results/closrca_bench_leaderboard.csv)
+- End-to-end notebook demo: [`notebooks/closrca_bench_demo.ipynb`](notebooks/closrca_bench_demo.ipynb)
+
+![Leaderboard snapshot](examples/closrca_bench_leaderboard.png)
+![Target confusion matrix](graphs/topology_target_cm.png)
 
 ## Public repo layout
 
@@ -18,8 +57,6 @@ The rest of the repository keeps the underlying implementation modules used by t
 - `remediation_engine/`
 - `results/`
 
-![Cisco Clos benchmark topology](graphs/cisco_clos_topology.png)
-
 ## Benchmark summary
 
 - Source: Cisco public telemetry repository scenarios under `12/`
@@ -35,27 +72,10 @@ The canonical benchmark card is [dataset/cisco_topology_benchmark/BENCHMARK_CARD
 
 ## Quickstart
 
-Install dependencies:
-
 ```bash
 python3 -m pip install -r requirements.txt
-```
-
-Build the public benchmark dataset:
-
-```bash
 python3 scripts/build_dataset.py --dataset topology-benchmark
-```
-
-Run the canonical training pipeline:
-
-```bash
 python3 scripts/train_pipeline.py --pipeline topology-benchmark
-```
-
-Regenerate benchmark evaluation tables:
-
-```bash
 python3 scripts/run_evaluation.py --suite topology-benchmark
 ```
 
@@ -123,6 +143,7 @@ python3 scripts/run_evaluation.py --suite topology-benchmark
 ## Key public entry points
 
 - [scripts/build_dataset.py](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/scripts/build_dataset.py)
+- [scripts/prepare_release_assets.py](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/scripts/prepare_release_assets.py)
 - [scripts/train_pipeline.py](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/scripts/train_pipeline.py)
 - [scripts/run_evaluation.py](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/scripts/run_evaluation.py)
 - [dataset/builder.py](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/dataset/builder.py)
@@ -143,3 +164,9 @@ The older synthetic and Cisco event-window experiments are still available and n
 - Manuscript: [paper.tex](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/paper.tex)
 - Citation metadata: [CITATION.cff](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/CITATION.cff)
 - Archive metadata: [.zenodo.json](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/.zenodo.json)
+- Code license: [LICENSE](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/LICENSE)
+- Data terms note: [DATA_LICENSE.md](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/DATA_LICENSE.md)
+
+## Zenodo and DOI
+
+`.zenodo.json` is included and the repository is now versioned for archival releases. Once the GitHub repository is connected to Zenodo and `v0.1.0` is archived, replace the temporary DOI badge with the minted Zenodo DOI badge.
