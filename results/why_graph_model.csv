@@ -1,0 +1,5 @@
+Capability,RandomForest,STGNN-Full,Units
+Public benchmark aggregate cause F1,0.9706589706589708,0.9531986531986532,F1Weighted
+59-node hidden-target accuracy,0.8846153846153846,1.0,Accuracy
+59-node simultaneous-fault cause accuracy,0.8484848484848485,0.8787878787878788,Accuracy
+Propagation tracing,No,Yes,qualitative

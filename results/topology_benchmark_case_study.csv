@@ -1,0 +1,2 @@
+scenario,root_cause,root_target,predicted_cause,predicted_target,anomaly_start,first_detected_window,detection_delay_seconds,trace_note
+S-200202_2014_evtmix-1,interface_shutdown,leaf4,interface_shutdown,leaf4,1580675176.715621,1580675200.0,23.28437900543213,This trace was collected from a controlled internal lab environment simulating enterprise traffic.

@@ -1,0 +1,15 @@
+Model,Slice,CauseAccuracy,TargetF1Weighted,Windows
+RandomForest,SingleFailure,1.0,1.0,10
+RandomForest,CompoundFailure,0.9565217391304348,1.0,23
+MLP,SingleFailure,1.0,1.0,10
+MLP,CompoundFailure,0.9565217391304348,0.9765886287625417,23
+CorrelationRCA,SingleFailure,0.6,0.7,10
+CorrelationRCA,CompoundFailure,0.6521739130434783,0.9517439082656474,23
+RuleBasedRCA,SingleFailure,0.0,0.0,10
+RuleBasedRCA,CompoundFailure,0.43478260869565216,0.31620553359683795,23
+STGNN-Full,SingleFailure,1.0,1.0,10
+STGNN-Full,CompoundFailure,0.9130434782608695,0.80479375696767,23
+STGNN-NoTopology,SingleFailure,0.9,0.0,10
+STGNN-NoTopology,CompoundFailure,0.9565217391304348,0.9420289855072462,23
+STGNN-NoTemporal,SingleFailure,1.0,0.9428571428571428,10
+STGNN-NoTemporal,CompoundFailure,0.9130434782608695,0.5808524309273935,23

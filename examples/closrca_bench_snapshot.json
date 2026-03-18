@@ -56,6 +56,20 @@
     {
       "Benchmark": "ClosRCA-Bench",
       "Task": "AnomalyDetection",
+      "Model": "CorrelationRCA",
+      "PrimaryMetric": "F1",
+      "Score": 0.6666666666666666
+    },
+    {
+      "Benchmark": "ClosRCA-Bench",
+      "Task": "AnomalyDetection",
+      "Model": "RuleBasedRCA",
+      "PrimaryMetric": "F1",
+      "Score": 0.6595744680851063
+    },
+    {
+      "Benchmark": "ClosRCA-Bench",
+      "Task": "AnomalyDetection",
       "Model": "STGNN-Full",
       "PrimaryMetric": "F1",
       "Score": 0.8181818181818182
@@ -87,6 +101,20 @@
       "Model": "MLP",
       "PrimaryMetric": "F1Weighted",
       "Score": 0.9706589706589708
+    },
+    {
+      "Benchmark": "ClosRCA-Bench",
+      "Task": "CauseClassification",
+      "Model": "CorrelationRCA",
+      "PrimaryMetric": "F1Weighted",
+      "Score": 0.6620490620490621
+    },
+    {
+      "Benchmark": "ClosRCA-Bench",
+      "Task": "CauseClassification",
+      "Model": "RuleBasedRCA",
+      "PrimaryMetric": "F1Weighted",
+      "Score": 0.1691331923890063
     },
     {
       "Benchmark": "ClosRCA-Bench",
@@ -126,6 +154,20 @@
     {
       "Benchmark": "ClosRCA-Bench",
       "Task": "TargetLocalization",
+      "Model": "CorrelationRCA",
+      "PrimaryMetric": "F1Weighted",
+      "Score": 0.861989861989862
+    },
+    {
+      "Benchmark": "ClosRCA-Bench",
+      "Task": "TargetLocalization",
+      "Model": "RuleBasedRCA",
+      "PrimaryMetric": "F1Weighted",
+      "Score": 0.1691331923890063
+    },
+    {
+      "Benchmark": "ClosRCA-Bench",
+      "Task": "TargetLocalization",
       "Model": "STGNN-Full",
       "PrimaryMetric": "F1Weighted",
       "Score": 0.837973137973138
@@ -150,6 +192,224 @@
       "Model": "STGNN-Full+SafetyGate",
       "PrimaryMetric": "RecoverySuccessRate",
       "Score": 0.8181818181818182
+    }
+  ],
+  "temporal_tracking": [
+    {
+      "Model": "RandomForest",
+      "RCAAccuracy": 0.9696969696969696,
+      "MeanDetectionDelaySeconds": 80.39399613652911,
+      "DetectionRecall": 0.875,
+      "InferenceLatencyMs": NaN
+    },
+    {
+      "Model": "MLP",
+      "RCAAccuracy": 0.9696969696969696,
+      "MeanDetectionDelaySeconds": 5.226132313410441,
+      "DetectionRecall": 0.75,
+      "InferenceLatencyMs": NaN
+    },
+    {
+      "Model": "CorrelationRCA",
+      "RCAAccuracy": 0.6363636363636364,
+      "MeanDetectionDelaySeconds": 1.5539754927158356,
+      "DetectionRecall": 1.0,
+      "InferenceLatencyMs": 0.0074072752336394
+    },
+    {
+      "Model": "RuleBasedRCA",
+      "RCAAccuracy": 0.303030303030303,
+      "MeanDetectionDelaySeconds": 39.05397549271584,
+      "DetectionRecall": 1.0,
+      "InferenceLatencyMs": 0.0009322088832656
+    },
+    {
+      "Model": "STGNN-Full",
+      "RCAAccuracy": 0.9393939393939394,
+      "MeanDetectionDelaySeconds": 5.226132313410441,
+      "DetectionRecall": 0.75,
+      "InferenceLatencyMs": 0.0422040999789411
+    },
+    {
+      "Model": "STGNN-NoTopology",
+      "RCAAccuracy": 0.9393939393939394,
+      "MeanDetectionDelaySeconds": 6.271358776092529,
+      "DetectionRecall": 0.625,
+      "InferenceLatencyMs": NaN
+    },
+    {
+      "Model": "STGNN-NoTemporal",
+      "RCAAccuracy": 0.9393939393939394,
+      "MeanDetectionDelaySeconds": 6.271358776092529,
+      "DetectionRecall": 0.625,
+      "InferenceLatencyMs": 0.0064191793734651
+    }
+  ],
+  "compound_failure_slice": [
+    {
+      "Model": "RandomForest",
+      "Slice": "SingleFailure",
+      "CauseAccuracy": 1.0,
+      "TargetF1Weighted": 1.0,
+      "Windows": 10
+    },
+    {
+      "Model": "RandomForest",
+      "Slice": "CompoundFailure",
+      "CauseAccuracy": 0.9565217391304348,
+      "TargetF1Weighted": 1.0,
+      "Windows": 23
+    },
+    {
+      "Model": "MLP",
+      "Slice": "SingleFailure",
+      "CauseAccuracy": 1.0,
+      "TargetF1Weighted": 1.0,
+      "Windows": 10
+    },
+    {
+      "Model": "MLP",
+      "Slice": "CompoundFailure",
+      "CauseAccuracy": 0.9565217391304348,
+      "TargetF1Weighted": 0.9765886287625416,
+      "Windows": 23
+    },
+    {
+      "Model": "CorrelationRCA",
+      "Slice": "SingleFailure",
+      "CauseAccuracy": 0.6,
+      "TargetF1Weighted": 0.7,
+      "Windows": 10
+    },
+    {
+      "Model": "CorrelationRCA",
+      "Slice": "CompoundFailure",
+      "CauseAccuracy": 0.6521739130434783,
+      "TargetF1Weighted": 0.9517439082656474,
+      "Windows": 23
+    },
+    {
+      "Model": "RuleBasedRCA",
+      "Slice": "SingleFailure",
+      "CauseAccuracy": 0.0,
+      "TargetF1Weighted": 0.0,
+      "Windows": 10
+    },
+    {
+      "Model": "RuleBasedRCA",
+      "Slice": "CompoundFailure",
+      "CauseAccuracy": 0.4347826086956521,
+      "TargetF1Weighted": 0.3162055335968379,
+      "Windows": 23
+    },
+    {
+      "Model": "STGNN-Full",
+      "Slice": "SingleFailure",
+      "CauseAccuracy": 1.0,
+      "TargetF1Weighted": 1.0,
+      "Windows": 10
+    },
+    {
+      "Model": "STGNN-Full",
+      "Slice": "CompoundFailure",
+      "CauseAccuracy": 0.9130434782608696,
+      "TargetF1Weighted": 0.80479375696767,
+      "Windows": 23
+    },
+    {
+      "Model": "STGNN-NoTopology",
+      "Slice": "SingleFailure",
+      "CauseAccuracy": 0.9,
+      "TargetF1Weighted": 0.0,
+      "Windows": 10
+    },
+    {
+      "Model": "STGNN-NoTopology",
+      "Slice": "CompoundFailure",
+      "CauseAccuracy": 0.9565217391304348,
+      "TargetF1Weighted": 0.9420289855072462,
+      "Windows": 23
+    },
+    {
+      "Model": "STGNN-NoTemporal",
+      "Slice": "SingleFailure",
+      "CauseAccuracy": 1.0,
+      "TargetF1Weighted": 0.9428571428571428,
+      "Windows": 10
+    },
+    {
+      "Model": "STGNN-NoTemporal",
+      "Slice": "CompoundFailure",
+      "CauseAccuracy": 0.9130434782608696,
+      "TargetF1Weighted": 0.5808524309273935,
+      "Windows": 23
+    }
+  ],
+  "case_study": [
+    {
+      "scenario": "S-200202_2014_evtmix-1",
+      "root_cause": "interface_shutdown",
+      "root_target": "leaf4",
+      "predicted_cause": "interface_shutdown",
+      "predicted_target": "leaf4",
+      "anomaly_start": 1580675176.715621,
+      "first_detected_window": 1580675200.0,
+      "detection_delay_seconds": 23.28437900543213,
+      "trace_note": "This trace was collected from a controlled internal lab environment simulating enterprise traffic."
+    }
+  ],
+  "synthetic_scaleup": [
+    {
+      "Model": "RandomForest",
+      "Topology": "Synthetic Clos-59",
+      "NodeCount": 59,
+      "WindowCount": 900,
+      "AnomalousWindows": 104,
+      "HiddenTargetAccuracy": 0.8846153846153846,
+      "OverallTargetAccuracy": 0.6634615384615384,
+      "SingleFaultCauseAccuracy": 1.0,
+      "SimultaneousFaultCauseAccuracy": 0.8484848484848485,
+      "InferenceLatencyMs": 0.2447441240432314,
+      "ThroughputWindowsPerSecond": 4085.899932875858
+    },
+    {
+      "Model": "STGNN-Full",
+      "Topology": "Synthetic Clos-59",
+      "NodeCount": 59,
+      "WindowCount": 900,
+      "AnomalousWindows": 104,
+      "HiddenTargetAccuracy": 1.0,
+      "OverallTargetAccuracy": 0.25,
+      "SingleFaultCauseAccuracy": 1.0,
+      "SimultaneousFaultCauseAccuracy": 0.8787878787878788,
+      "InferenceLatencyMs": 0.1181204219702286,
+      "ThroughputWindowsPerSecond": 8465.93656981722
+    }
+  ],
+  "why_graph_model": [
+    {
+      "Capability": "Public benchmark aggregate cause F1",
+      "RandomForest": "0.9706589706589708",
+      "STGNN-Full": "0.9531986531986532",
+      "Units": "F1Weighted"
+    },
+    {
+      "Capability": "59-node hidden-target accuracy",
+      "RandomForest": "0.8846153846153846",
+      "STGNN-Full": "1.0",
+      "Units": "Accuracy"
+    },
+    {
+      "Capability": "59-node simultaneous-fault cause accuracy",
+      "RandomForest": "0.8484848484848485",
+      "STGNN-Full": "0.8787878787878788",
+      "Units": "Accuracy"
+    },
+    {
+      "Capability": "Propagation tracing",
+      "RandomForest": "No",
+      "STGNN-Full": "Yes",
+      "Units": "qualitative"
     }
   ]
 }

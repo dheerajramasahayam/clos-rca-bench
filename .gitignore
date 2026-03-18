@@ -1,12 +1,22 @@
 __pycache__/
 *.py[cod]
 .DS_Store
+.pytest_cache/
+
+paper.aux
+paper.bbl
+paper.blg
+paper.log
+paper.out
+paper.synctex.gz
+paper.xdv
 
 results/*.pth
 results/*.joblib
 results/real/*.pth
 results/real/*.joblib
 releases/**/*.zip
+submission/artifacts/
 
 dataset/X.npy
 dataset/y_anomaly.npy

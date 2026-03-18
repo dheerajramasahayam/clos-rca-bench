@@ -36,6 +36,20 @@ from remediation_engine.digital_twin import (
     evaluate_recovery,
     load_canonical_topology,
 )
+from results.topology_research_extensions import (
+    build_case_study_outputs,
+    build_multi_failure_outputs,
+    build_positioning_outputs,
+    build_scenario_catalog,
+    build_temporal_tracking_outputs,
+    evaluate_specialized_baselines,
+    load_feature_names,
+    measure_graph_latency,
+    save_case_study_figure,
+    save_deployment_figure,
+    save_detection_delay_figure,
+    save_multi_failure_figure,
+)
 from root_cause_analysis.topology_rca_model import SpatioTemporalGraphModel, load_topology_benchmark
 from telemetry_parser.topology_benchmark import preprocess_topology_benchmark
 
@@ -486,6 +500,8 @@ def main():
 
     X, y_anomaly, y_cause, y_target, adjacency, train_idx, val_idx, test_idx = load_topology_benchmark()
     node_names, label_maps, metadata = load_metadata()
+    feature_names = load_feature_names(DATA_DIR)
+    scenario_catalog = build_scenario_catalog(metadata["scenario"].drop_duplicates().tolist())
     target_device_names = [label_maps["target"][str(idx)] for idx in range(1, len(label_maps["target"]))]
     target_node_indices = [node_names.index(device_name) for device_name in target_device_names]
     cause_labels = [label_maps["cause"][str(idx)] for idx in range(len(label_maps["cause"]))]
@@ -502,7 +518,7 @@ def main():
 
     train_anomaly_mask = y_cause[train_idx] > 0
     test_anomaly_mask = y_cause[test_idx] > 0
-    cause_rows, _ = evaluate_tabular_baselines(
+    cause_rows, cause_baseline_predictions = evaluate_tabular_baselines(
         flat_X[train_idx][train_anomaly_mask],
         flat_X[test_idx][test_anomaly_mask],
         y_cause[train_idx][train_anomaly_mask],
@@ -517,6 +533,28 @@ def main():
         y_target[test_idx][test_anomaly_mask],
         task_name="target",
     )
+
+    (
+        specialized_anomaly_rows,
+        specialized_cause_rows,
+        specialized_target_rows,
+        specialized_prediction_bundle,
+        latency_map,
+    ) = evaluate_specialized_baselines(
+        X,
+        y_anomaly,
+        y_cause,
+        y_target,
+        train_idx,
+        val_idx,
+        test_idx,
+        node_names,
+        label_maps,
+        feature_names,
+    )
+    anomaly_rows.extend(specialized_anomaly_rows)
+    cause_rows.extend(specialized_cause_rows)
+    target_rows.extend(specialized_target_rows)
 
     graph_variants = [
         ("STGNN-Full", True, True),
@@ -566,6 +604,11 @@ def main():
             "anomaly_scores": anomaly_scores,
         }
 
+    latency_map["STGNN-Full"] = measure_graph_latency(graph_predictions["STGNN-Full"]["model"], X[test_idx], adjacency)
+    latency_map["STGNN-NoTemporal"] = measure_graph_latency(
+        graph_predictions["STGNN-NoTemporal"]["model"], X[test_idx], adjacency
+    )
+
     anomaly_df = pd.DataFrame([{key: value for key, value in row.items() if key != "Scores"} for row in anomaly_rows])
     cause_df = pd.DataFrame(cause_rows)
     target_df = pd.DataFrame(target_rows)
@@ -577,6 +620,8 @@ def main():
     target_prediction_slices = {
         "RandomForest": target_baseline_predictions["RandomForest"],
         "MLP": target_baseline_predictions["MLP"],
+        "RuleBasedRCA": specialized_prediction_bundle["RuleBasedRCA"]["target_pred"][test_anomaly_mask],
+        "CorrelationRCA": specialized_prediction_bundle["CorrelationRCA"]["target_pred"][test_anomaly_mask],
         "STGNN-Full": graph_predictions["STGNN-Full"]["target_pred"][test_anomaly_mask],
         "STGNN-NoTopology": graph_predictions["STGNN-NoTopology"]["target_pred"][test_anomaly_mask],
         "STGNN-NoTemporal": graph_predictions["STGNN-NoTemporal"]["target_pred"][test_anomaly_mask],
@@ -611,6 +656,32 @@ def main():
     )
 
     test_metadata = metadata.iloc[test_idx].reset_index(drop=True)
+    anomaly_score_lookup = {row["Model"]: row["Scores"] for row in anomaly_rows}
+    rf_cause_full = np.zeros(len(test_idx), dtype=int)
+    rf_cause_full[test_anomaly_mask] = cause_baseline_predictions["RandomForest"]
+    mlp_cause_full = np.zeros(len(test_idx), dtype=int)
+    mlp_cause_full[test_anomaly_mask] = cause_baseline_predictions["MLP"]
+    rf_target_full = np.zeros(len(test_idx), dtype=int)
+    rf_target_full[test_anomaly_mask] = target_baseline_predictions["RandomForest"]
+    mlp_target_full = np.zeros(len(test_idx), dtype=int)
+    mlp_target_full[test_anomaly_mask] = target_baseline_predictions["MLP"]
+    prediction_bundle = {
+        "RandomForest": {
+            "anomaly_pred": anomaly_preds["RandomForest"],
+            "cause_pred": rf_cause_full,
+            "target_pred": rf_target_full,
+            "anomaly_scores": anomaly_score_lookup["RandomForest"],
+        },
+        "MLP": {
+            "anomaly_pred": anomaly_preds["MLP"],
+            "cause_pred": mlp_cause_full,
+            "target_pred": mlp_target_full,
+            "anomaly_scores": anomaly_score_lookup["MLP"],
+        },
+        **specialized_prediction_bundle,
+        **graph_predictions,
+    }
+
     remediation_details, remediation_metrics = evaluate_remediation(
         graph_predictions["STGNN-Full"]["cause_pred"],
         graph_predictions["STGNN-Full"]["target_pred"],
@@ -652,9 +723,55 @@ def main():
     )
     pd.DataFrame(leaderboard_rows).to_csv(RESULTS_DIR / "closrca_bench_leaderboard.csv", index=False)
 
+    temporal_detail_df, temporal_summary_df = build_temporal_tracking_outputs(
+        test_metadata,
+        y_cause[test_idx],
+        prediction_bundle,
+        cause_df,
+        latency_map,
+        scenario_catalog,
+    )
+    temporal_detail_df.to_csv(RESULTS_DIR / "topology_benchmark_temporal_tracking.csv", index=False)
+    temporal_summary_df.to_csv(RESULTS_DIR / "topology_benchmark_temporal_summary.csv", index=False)
+
+    multi_failure_df = build_multi_failure_outputs(
+        test_metadata,
+        y_cause[test_idx],
+        y_target[test_idx],
+        prediction_bundle,
+        scenario_catalog,
+    )
+    multi_failure_df.to_csv(RESULTS_DIR / "topology_benchmark_multi_failure.csv", index=False)
+
+    positioning_df = build_positioning_outputs(temporal_summary_df, multi_failure_df)
+    positioning_df.to_csv(RESULTS_DIR / "topology_benchmark_positioning.csv", index=False)
+
+    case_summary_df, propagation_df, case_metadata, node_activation_df = build_case_study_outputs(
+        X,
+        metadata,
+        graph_predictions["STGNN-Full"]["model"],
+        adjacency,
+        node_names,
+        label_maps,
+        scenario_catalog,
+    )
+    case_summary_df.to_csv(RESULTS_DIR / "topology_benchmark_case_study.csv", index=False)
+    propagation_df.to_csv(RESULTS_DIR / "topology_benchmark_propagation_traces.csv", index=False)
+    node_activation_df.to_csv(RESULTS_DIR / "topology_benchmark_node_activation.csv", index=False)
+
     save_model_comparison(anomaly_df, cause_df, target_df)
     save_topology_graph(adjacency, node_names)
     save_recovery_figure(digital_twin_details)
+    save_detection_delay_figure(temporal_summary_df, GRAPHS_DIR / "topology_detection_delay.png")
+    save_multi_failure_figure(multi_failure_df, GRAPHS_DIR / "topology_multi_failure.png")
+    save_deployment_figure(positioning_df, GRAPHS_DIR / "datacenter_rca_deployment_pipeline.png")
+    save_case_study_figure(
+        case_summary_df,
+        propagation_df,
+        case_metadata,
+        node_activation_df,
+        GRAPHS_DIR / "topology_case_study.png",
+    )
 
     full_model = graph_predictions["STGNN-Full"]["model"]
     torch.save(
@@ -677,6 +794,10 @@ def main():
     print(target_slice_df.to_string(index=False))
     print(pd.DataFrame([remediation_metrics]).to_string(index=False))
     print(pd.DataFrame([digital_twin_summary]).to_string(index=False))
+    print(temporal_summary_df.to_string(index=False))
+    print(multi_failure_df.to_string(index=False))
+    print(positioning_df.to_string(index=False))
+    print(case_summary_df.to_string(index=False))
 
 
 if __name__ == "__main__":

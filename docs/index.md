@@ -10,6 +10,7 @@ ClosRCA-Bench is an open benchmark for topology-grounded root-cause analysis, hi
 - Benchmark card: [dataset/cisco_topology_benchmark/BENCHMARK_CARD.md](https://github.com/dheerajramasahayam/clos-rca-bench/blob/main/dataset/cisco_topology_benchmark/BENCHMARK_CARD.md)
 - Protocol: [benchmark_protocol/README.md](https://github.com/dheerajramasahayam/clos-rca-bench/blob/main/benchmark_protocol/README.md)
 - Paper PDF: [paper.pdf](https://github.com/dheerajramasahayam/clos-rca-bench/blob/main/paper.pdf)
+- Repository map: [docs/REPOSITORY_MAP.md](https://github.com/dheerajramasahayam/clos-rca-bench/blob/main/docs/REPOSITORY_MAP.md)
 
 ## What the benchmark measures
 
@@ -17,6 +18,7 @@ ClosRCA-Bench is an open benchmark for topology-grounded root-cause analysis, hi
 - Multiclass cause classification over anomalous windows
 - Target-device localization for both observed and hidden targets
 - Counterfactual remediation quality in a topology digital twin
+- Temporal detection delay, propagation tracing, and supplementary scale-up stress behavior
 
 ## Why hidden-target RCA matters
 

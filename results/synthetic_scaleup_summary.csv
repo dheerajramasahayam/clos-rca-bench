@@ -1,0 +1,3 @@
+Model,Topology,NodeCount,WindowCount,AnomalousWindows,HiddenTargetAccuracy,OverallTargetAccuracy,SingleFaultCauseAccuracy,SimultaneousFaultCauseAccuracy,InferenceLatencyMs,ThroughputWindowsPerSecond
+RandomForest,Synthetic Clos-59,59,900,104,0.8846153846153846,0.6634615384615384,1.0,0.8484848484848485,0.2447441240432314,4085.8999328758587
+STGNN-Full,Synthetic Clos-59,59,900,104,1.0,0.25,1.0,0.8787878787878788,0.11812042197022862,8465.93656981722

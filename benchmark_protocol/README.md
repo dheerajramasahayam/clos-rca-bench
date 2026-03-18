@@ -2,12 +2,15 @@
 
 ClosRCA-Bench is evaluated as a fixed-split benchmark, not an ad hoc experiment.
 
+This document applies to the canonical `topology-benchmark` suite. The `scaleup-synthetic` suite is supplementary and is not part of the official public leaderboard contract.
+
 ## Tasks
 
 1. Binary anomaly detection on graph windows.
 2. Multiclass cause classification on anomalous windows.
 3. Target-device localization on anomalous windows.
 4. Counterfactual remediation validation in the topology digital twin.
+5. Temporal root-cause tracking with scenario-level detection delay.
 
 ## Canonical dataset
 
@@ -30,6 +33,7 @@ ClosRCA-Bench is evaluated as a fixed-split benchmark, not an ad hoc experiment.
 | Cause classification | `F1Weighted` | Accuracy, PrecisionWeighted, RecallWeighted, F1Macro |
 | Target localization | `F1Weighted` | Accuracy, PrecisionWeighted, RecallWeighted, F1Macro |
 | Counterfactual recovery | `RecoverySuccessRate` | Reachability gain, blast-radius reduction, overload reduction |
+| Temporal tracking | `MeanDetectionDelaySeconds` plus `RCAAccuracy` | Detection recall, inference latency |
 
 ## Hidden-target slice
 
@@ -38,6 +42,22 @@ The benchmark contains hidden-target cases where direct telemetry is absent for 
 - Hidden targets: `leaf3`, `spine4-3464`
 - Required reporting: `ObservedTargets` and `HiddenTargets`
 - Output file: `results/topology_benchmark_target_slices.csv`
+
+## Compound-failure slice
+
+The public Clos traces also include mixed-event scenarios, exposed as a compound-failure evaluation slice.
+
+- Slice names: `SingleFailure`, `CompoundFailure`
+- Output file: `results/topology_benchmark_multi_failure.csv`
+- Intended use: stress-test RCA stability when the scenario contains multiple control-plane or interface events instead of a single clean fault
+
+## Temporal and propagation outputs
+
+- `results/topology_benchmark_temporal_tracking.csv`: per-scenario detection timing
+- `results/topology_benchmark_temporal_summary.csv`: per-method delay, recall, and latency summary
+- `results/topology_benchmark_positioning.csv`: rule-based, correlation-based, graph-only, and temporal-graph comparison
+- `results/topology_benchmark_case_study.csv`: case-study summary row for the public lab trace
+- `results/topology_benchmark_propagation_traces.csv`: topology path tracing from the root target to affected nodes
 
 ## Submission outputs
 

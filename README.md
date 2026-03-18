@@ -8,6 +8,8 @@
 
 ClosRCA-Bench is a maintained public research artifact for topology-grounded datacenter root-cause analysis. The benchmark turns Cisco's public Clos-topology telemetry scenarios into fixed graph windows for anomaly detection, cause classification, target-device localization, and counterfactual remediation validation, with a specific emphasis on hidden-target cases where the failing device is not directly monitored.
 
+The maintained manuscript source is [paper.tex](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/paper.tex). The repo was cleaned up to remove an older duplicate Markdown-paper workflow, so the LaTeX paper and the benchmark release assets are now the only canonical paper artifacts.
+
 ## Why hidden-target RCA matters
 
 Real network incidents do not always surface on the device that ultimately needs repair. In ClosRCA-Bench, `leaf3` and `spine4-3464` are intentionally retained as hidden-target labels even though they are not directly observed in the monitored subset. That forces benchmarked systems to reason over topology and symptom propagation instead of simply memorizing direct telemetry signatures.
@@ -37,6 +39,11 @@ python3 scripts/run_evaluation.py --suite topology-benchmark
 - Benchmark snapshot: [`examples/closrca_bench_snapshot.json`](examples/closrca_bench_snapshot.json)
 - Leaderboard CSV: [`results/closrca_bench_leaderboard.csv`](results/closrca_bench_leaderboard.csv)
 - End-to-end notebook demo: [`notebooks/closrca_bench_demo.ipynb`](notebooks/closrca_bench_demo.ipynb)
+- Temporal tracking summary: [`results/topology_benchmark_temporal_summary.csv`](results/topology_benchmark_temporal_summary.csv)
+- Compound-failure slice: [`results/topology_benchmark_multi_failure.csv`](results/topology_benchmark_multi_failure.csv)
+- Case-study summary: [`results/topology_benchmark_case_study.csv`](results/topology_benchmark_case_study.csv)
+- 59-node synthetic scale-up study: [`results/synthetic_scaleup_summary.csv`](results/synthetic_scaleup_summary.csv)
+- Graph-model positioning table: [`results/why_graph_model.csv`](results/why_graph_model.csv)
 
 ![Leaderboard snapshot](examples/closrca_bench_leaderboard.png)
 ![Target confusion matrix](graphs/topology_target_cm.png)
@@ -56,6 +63,8 @@ The rest of the repository keeps the underlying implementation modules used by t
 - `root_cause_analysis/`
 - `remediation_engine/`
 - `results/`
+
+For a reviewer-oriented directory map, see [docs/REPOSITORY_MAP.md](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/docs/REPOSITORY_MAP.md). Directory-level notes for generated artifacts live in [results/README.md](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/results/README.md) and [graphs/README.md](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/graphs/README.md).
 
 ## Benchmark summary
 
@@ -140,6 +149,61 @@ python3 scripts/run_evaluation.py --suite topology-benchmark
 ![Topology benchmark comparison](graphs/topology_model_comparison.png)
 ![Topology digital twin recovery](graphs/topology_digital_twin_recovery.png)
 
+## Why Use a Graph Model?
+
+Random Forest is the strongest aggregate cause classifier on the small public benchmark. The graph model is not justified by aggregate score alone; it is justified where topology matters: hidden-target localization, simultaneous-fault tracking, and propagation-chain recovery.
+
+| Capability | RandomForest | STGNN-Full |
+| :--- | ---: | ---: |
+| Public benchmark aggregate cause F1 | 0.9707 | 0.9532 |
+| 59-node hidden-target accuracy | 0.8846 | 1.0000 |
+| 59-node simultaneous-fault cause accuracy | 0.8485 | 0.8788 |
+| Propagation tracing | No | Yes |
+
+The practical interpretation is narrower and stronger than “deep learning wins”: on a small fixed topology, RF is an excellent classifier; on hidden targets and simultaneous faults, the temporal graph model is the more defensible RCA engine.
+
+## 59-Node Synthetic Stress Study
+
+To partially address the scale limit of the public benchmark, the repo now includes a supplementary 59-node synthetic Clos study with `900` windows, masked hidden targets, and simultaneous fault injections. The same evaluation path also records inference cost.
+
+```bash
+python3 scripts/run_evaluation.py --suite scaleup-synthetic
+```
+
+On this scale-up replay, `STGNN-Full` reaches perfect hidden-target accuracy (`1.0000`) versus `0.8846` for Random Forest, and retains higher simultaneous-fault cause accuracy (`0.8788` vs `0.8485`). Batch inference also remains operationally lightweight at roughly `0.118 ms/window` and `8,466 windows/s`.
+
+![59-node synthetic scale-up study](graphs/synthetic_scaleup_performance.png)
+
+## Temporal Root Cause Tracking
+
+The benchmark now reports time-aware RCA instead of only static per-window labels. The temporal summary aligns model detections to the scenario event timestamps and records mean root-cause detection delay in seconds.
+
+| Method | RCA Accuracy | Mean Detection Delay | Inference Latency |
+| :--- | ---: | ---: | ---: |
+| Rule-based RCA | 0.3030 | 39.1 s | 0.0009 ms/window |
+| Correlation-based RCA | 0.6364 | 1.6 s | 0.0074 ms/window |
+| GCN-Static | 0.9394 | 6.3 s | 0.0064 ms/window |
+| STGNN-Full | 0.9394 | 5.2 s | 0.0422 ms/window |
+
+The full temporal graph model keeps the graph-baseline accuracy while improving detection delay from `6.3 s` to `5.2 s`.
+
+![Temporal detection delay](graphs/topology_detection_delay.png)
+
+## Compound-Failure Slice and Case Study
+
+The public `evtmix` traces are also reported as a compound-failure slice. On the current held-out split, `STGNN-Full` reaches `1.0000` cause accuracy on single-failure windows and `0.9130` on compound-failure windows.
+
+For the public case study trace `S-200202_2014_evtmix-1`, the model identifies `leaf4` interface shutdown as the root cause target with `23.3 s` detection delay, then traces downstream activation on `leaf8`, `leaf7`, and `spine3` across the Clos graph.
+
+![Compound-failure slice](graphs/topology_multi_failure.png)
+![Temporal case study](graphs/topology_case_study.png)
+
+## Deployment Pipeline
+
+The repo now includes an explicit deployment view that places temporal RCA between anomaly/IDS signals and operator-safe remediation. On the measured CPU path in this artifact, all comparison methods stay below `0.05 ms/window` once features are materialized, which keeps the RCA stage compatible with near-real-time operations.
+
+![Datacenter RCA deployment pipeline](graphs/datacenter_rca_deployment_pipeline.png)
+
 ## Key public entry points
 
 - [scripts/build_dataset.py](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/scripts/build_dataset.py)
@@ -158,6 +222,8 @@ The older synthetic and Cisco event-window experiments are still available and n
 - `python3 scripts/build_dataset.py --dataset synthetic`
 - `python3 scripts/train_pipeline.py --pipeline cisco-real`
 - `python3 scripts/run_evaluation.py --suite synthetic`
+
+These suites are retained for reproducibility only. The main benchmark claim in the paper and release remains `topology-benchmark`, with `scaleup-synthetic` treated as supplementary stress testing rather than a second canonical benchmark.
 
 ## Paper and citation
 

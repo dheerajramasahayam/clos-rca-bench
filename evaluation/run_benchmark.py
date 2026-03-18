@@ -16,6 +16,7 @@ os.chdir(ROOT_DIR)
 
 from results.evaluate import run_evaluation as evaluate_synthetic
 from results.evaluate_cisco import main as evaluate_cisco_real
+from results.evaluate_scaleup_synthetic import main as evaluate_scaleup_synthetic
 from results.evaluate_topology_benchmark import main as evaluate_topology_benchmark
 
 
@@ -49,6 +50,16 @@ EVALUATION_SPECS: dict[str, EvaluationSpec] = {
             Path("results/topology_benchmark_cause.csv"),
             Path("results/topology_benchmark_target.csv"),
             Path("results/closrca_bench_leaderboard.csv"),
+        ),
+    ),
+    "scaleup-synthetic": EvaluationSpec(
+        name="scaleup-synthetic",
+        description="Run the supplementary 59-node synthetic Clos scale-up and simultaneous-fault stress study.",
+        runner=evaluate_scaleup_synthetic,
+        key_outputs=(
+            Path("results/synthetic_scaleup_summary.csv"),
+            Path("results/why_graph_model.csv"),
+            Path("graphs/synthetic_scaleup_performance.png"),
         ),
     ),
 }

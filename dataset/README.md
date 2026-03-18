@@ -16,6 +16,7 @@ This directory is the public data surface for `clos-rca-bench`.
 - Builders live in [dataset/builder.py](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/dataset/builder.py).
 - Downloaders stay separate from processed artifacts so the GitHub repo can remain lightweight.
 - The canonical benchmark card is [dataset/cisco_topology_benchmark/BENCHMARK_CARD.md](/Users/dheerajramasahayam/Desktop/Projects/clos-rca-bench/dataset/cisco_topology_benchmark/BENCHMARK_CARD.md).
+- The canonical paper dataset is the Cisco Clos topology benchmark. The other datasets remain available for historical baselines and implementation comparison.
 
 ## Notes for GitHub publication
 

@@ -8,11 +8,14 @@ This directory provides the public benchmark evaluation entry point.
 python3 scripts/run_evaluation.py --suite topology-benchmark
 ```
 
+`topology-benchmark` is the only canonical public benchmark suite. `scaleup-synthetic` is supplementary, and `synthetic` / `cisco-real` are retained legacy suites.
+
 ## Supported suites
 
 - `synthetic`
 - `cisco-real`
 - `topology-benchmark`
+- `scaleup-synthetic`
 - `all`
 
 ## Primary outputs
@@ -24,3 +27,5 @@ python3 scripts/run_evaluation.py --suite topology-benchmark
 - `results/topology_benchmark_remediation.csv`
 - `results/topology_benchmark_digital_twin.csv`
 - `results/closrca_bench_leaderboard.csv`
+- `results/synthetic_scaleup_summary.csv`
+- `results/why_graph_model.csv`

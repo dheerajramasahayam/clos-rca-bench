@@ -26,7 +26,7 @@ United States
 \maketitle
 
 \begin{abstract}
-Open research on datacenter-network root cause analysis (RCA) is limited by two recurring problems: many studies rely on private production traces, and public studies often omit the topology and remediation context needed for self-healing systems. This paper introduces \textit{ClosRCA-Bench}, a reproducible topology-grounded benchmark constructed from Cisco's public Clos-topology telemetry repository by combining event files, CDP maps, and per-device YANG telemetry into fixed graph windows. The resulting benchmark contains 311 windows over 11 topology nodes with 30 features per node and four cause families: BFD outage, blackhole, ECMP change, and interface shutdown. Two fault classes localize to hidden target devices that are not directly monitored, making topology-aware localization a first-class task. The paper evaluates Random Forest, MLP, and a spatio-temporal graph neural network (STGNN) with topology and temporal ablations, and then measures remediation with a safety gate and a counterfactual topology digital twin. On the held-out split, Random Forest achieves the strongest anomaly F1 at 0.9688 and weighted RCA cause F1 at 0.9707. The full STGNN reaches 0.8380 weighted F1 for target-device localization and 1.0000 hidden-target accuracy, while the no-topology ablation collapses to 0.0000 hidden-target accuracy. In the counterfactual recovery twin, gated actions improve mean reachability from 0.9740 under fault to 1.0000 after recovery and achieve 0.8182 recovery-success rate while blocking 100\% of mismatched unsafe actions. The main contribution is therefore an open benchmark and evaluation protocol that makes topology-aware and recovery-aware RCA measurable.
+Open research on datacenter-network root cause analysis (RCA) is limited by two recurring problems: many studies rely on private production traces, and public studies often omit the topology and remediation context needed for self-healing systems. This paper introduces \textit{ClosRCA-Bench}, a reproducible topology-grounded benchmark constructed from Cisco's public Clos-topology telemetry repository by combining event files, CDP maps, and per-device YANG telemetry into fixed graph windows. The resulting benchmark contains 311 windows over 11 topology nodes with 30 features per node and four cause families: BFD outage, blackhole, ECMP change, and interface shutdown. Two fault classes localize to hidden target devices that are not directly monitored, making topology-aware localization a first-class task. The paper evaluates rule-based, correlation-based, graph-only, and spatio-temporal graph RCA methods, then measures remediation with a safety gate and a counterfactual topology digital twin. On the held-out split, Random Forest achieves the strongest anomaly F1 at 0.9688 and weighted RCA cause F1 at 0.9707. The full STGNN reaches 0.8380 weighted F1 for target-device localization and 1.0000 hidden-target accuracy, while the no-topology ablation collapses to 0.0000 hidden-target accuracy. In temporal tracking, the full STGNN attains 0.9394 RCA accuracy with 5.2\,s mean detection delay, improving over the graph-only baseline's 6.3\,s delay at the same RCA accuracy. On the compound-failure slice, the full STGNN retains 0.9130 cause accuracy compared with 1.0000 on single-failure windows. In the counterfactual recovery twin, gated actions improve mean reachability from 0.9740 under fault to 1.0000 after recovery and achieve 0.8182 recovery-success rate while blocking 100\% of mismatched unsafe actions. The main contribution is therefore an open benchmark and evaluation protocol that makes topology-aware, temporal, and recovery-aware RCA measurable.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -40,17 +40,18 @@ Recent work has shown that large-scale cloud and datacenter fault localization c
 
 This paper should also be read as deliberately distinct from earlier predictive-maintenance work, including the author's prior attention-guided failure forecasting study \cite{ramasahayam2026prediction}. That earlier work asked whether telemetry can predict failure within a forward warning horizon. The present work addresses a different operational question: once abnormal behavior is present, can a topology-grounded system localize the likely target and recommend an action that survives safety and counterfactual recovery checks?
 
-The paper makes three concrete contributions:
+The paper makes four concrete contributions:
 \begin{itemize}
 \item \textit{ClosRCA-Bench}, a topology-grounded public benchmark constructed from Cisco Clos-topology telemetry scenarios, event files, and CDP maps \cite{putina2018telemetry,ciscoTelemetryRepo},
 \item a spatio-temporal graph RCA model with explicit topology and temporal ablations for hidden-target localization,
+\item temporal root-cause tracking, compound-failure slicing, and a public case-study workflow that expose delay and propagation rather than only static labels,
 \item a safety-gated and counterfactual remediation protocol that measures action correctness, service recovery, and unsafe-action blocking on held-out anomalous windows.
 \end{itemize}
 
 \section{Related Work}
 Production-oriented datacenter fault detection and localization have been studied in both academic and industrial settings. Roy \textit{et al.} presented passive real-time fault localization for datacenters \cite{roy2017fault}, while Li \textit{et al.} described automated incident detection for cloud services \cite{li2021mining}. These efforts established the operational importance of fast localization, but the underlying data is difficult to reproduce publicly.
 
-Graph-based RCA has become a natural direction because infrastructure failures propagate over dependencies rather than isolated time series. AlertRCA showed that causality-enhanced graph learning improves alert-based RCA \cite{alertRCA2024}, and graph convolutional networks provide an effective message-passing foundation for this class of problems \cite{kipf2017semi}. At the same time, public network telemetry repositories from Cisco have enabled anomaly-detection studies on event-linked network data \cite{putina2018telemetry,ciscoTelemetryRepo}.
+Graph-based RCA has become a natural direction because infrastructure failures propagate over dependencies rather than isolated time series. AlertRCA showed that causality-enhanced graph learning improves alert-based RCA \cite{alertRCA2024}, and graph convolutional networks provide an effective message-passing foundation for this class of problems \cite{kipf2017semi}. At the same time, public network telemetry repositories from Cisco have enabled anomaly-detection studies on event-linked network data \cite{putina2018telemetry,ciscoTelemetryRepo}. In operational practice, however, RCA systems still range from hand-authored rules to correlation engines to graph models. The evaluation in this paper therefore compares a rule-based heuristic, a correlation/template baseline, a graph-only baseline, and the full temporal graph model rather than treating topology-aware learning in isolation.
 
 The present work is positioned as a benchmark-and-systems paper rather than a claim of a wholly new backbone architecture. Its novelty lies in combining public topology metadata, hidden-target RCA, and counterfactual remediation validation into one reproducible workflow.
 
@@ -98,6 +99,8 @@ The benchmark supports three tasks:
 \item target-device localization over anomalous windows.
 \end{itemize}
 
+In addition, the released evaluator converts window-level outputs into scenario-level temporal traces. For each test scenario, it aligns the first detected anomalous window with the fault-onset timestamp in the event file to report detection delay in seconds. It also projects post-fault node activations onto the topology graph to recover a causal chain from the inferred root target to downstream affected nodes.
+
 \section{Model and Recovery Twin}
 The proposed RCA model is a spatio-temporal graph neural network (STGNN). Each graph window is a tensor of shape \((T, N, F)\), where \(T\) is time, \(N\) is the number of topology nodes, and \(F\) is the per-node feature count. A GRU encodes each node's temporal behavior, graph convolution propagates state across the topology, and three heads predict anomaly, cause class, and target device.
 
@@ -109,7 +112,7 @@ Two ablations are evaluated:
 \item \textbf{No temporal}: replace temporal encoding with a mean-pooled projection.
 \end{itemize}
 
-The paper also evaluates two strong graph-free baselines, Random Forest and MLP, on flattened graph windows.
+The paper also evaluates two strong graph-free baselines, Random Forest and MLP, on flattened graph windows, plus a rule-based RCA heuristic and a correlation/template baseline. The graph-only GCN baseline is implemented as the no-temporal ablation, which removes the GRU while keeping graph propagation. This gives a direct comparison between static graph reasoning and the proposed temporal graph model.
 
 Remediation is evaluated in two stages. First, a safety gate validates whether an action is allowed on the predicted target and whether it respects simple topology constraints such as alternate-path availability for interface reroutes. Second, a lightweight topology digital twin scores the counterfactual effect of the action on service reachability, path diversity, overload, and blast radius. Each predicted cause-target pair maps to an action template such as \texttt{restore\_bfd\_session}, \texttt{rollback\_blackhole\_route}, or \texttt{reroute\_and\_restore\_interface}. This converts remediation from advisory text into a measurable recovery stage.
 
@@ -134,6 +137,54 @@ STGNN No Temporal & 0.7931 & 0.9532 & 0.6646 & 0.9000 & -- \\
 \end{table*}
 
 The topology effect is clearest in target localization. On the full anomalous test slice, the STGNN improves target-device weighted F1 from 0.6566 in the no-topology ablation to 0.8380. On the hidden-target subset, the full model reaches 1.0000 accuracy while the no-topology ablation falls to 0.0000. This indicates that message passing is doing useful work specifically where direct telemetry is unavailable.
+
+\begin{table}[t]
+\caption{Temporal Tracking and RCA Positioning}
+\label{tab:temporal}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Method & RCA Acc. & Delay (s) & Latency (ms) \\
+\midrule
+Rule-based RCA & 0.3030 & 39.1 & 0.0009 \\
+Correlation RCA & 0.6364 & 1.6 & 0.0074 \\
+GCN-Static & 0.9394 & 6.3 & 0.0064 \\
+STGNN Full & 0.9394 & 5.2 & 0.0422 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:temporal} makes the temporal-tracking contribution explicit. The rule-based and correlation baselines can react quickly on simple signatures, but their RCA accuracy remains weak. The graph-only baseline matches the full STGNN's RCA accuracy but lags in detection delay, improving from 6.3\,s to 5.2\,s only when temporal state is retained. Because all four methods remain below 0.05\,ms per window once features are materialized, the dominant operational tradeoff here is not raw inference speed but delay-accuracy behavior under topology-aware reasoning.
+
+Compound-failure scenarios are the more realistic stress test. On single-failure windows the STGNN reaches 1.0000 cause accuracy; on compound-failure windows it falls to 0.9130. The graph-only baseline matches this compound-failure accuracy but again detects later, which suggests that temporal state helps most in converting topology-aware RCA from a static labeler into a fast incident tracker rather than merely a higher-scoring classifier. Because the public mixed-event slice is still modest, we also add a supplementary 59-node synthetic Clos stress study with 900 windows, masked hidden targets, and simultaneous faults such as routing disturbance plus interface shutdown. In that stress study, the STGNN retains 0.8788 simultaneous-fault cause accuracy, compared with 0.8485 for Random Forest.
+
+\subsection{Why a Graph Model?}
+Table~\ref{tab:whygraph} addresses the obvious question raised by Table~\ref{tab:results}: if Random Forest wins aggregate cause F1 on the public benchmark, why use the more complex graph model at all? The answer is that the graph model is not the best choice for every aggregate metric on a small fixed topology. It is the more defensible RCA engine when topology-dependent reasoning is the actual requirement. In the supplementary 59-node stress study, the full STGNN reaches 1.0000 hidden-target accuracy while Random Forest reaches 0.8846, and the STGNN degrades less under simultaneous faults. It also produces propagation traces directly, whereas the tabular baseline remains a labeler without a causal chain.
+
+\begin{table}[t]
+\caption{Why Use a Graph Model?}
+\label{tab:whygraph}
+\centering
+\begin{tabular}{lcc}
+\toprule
+Capability & RF & STGNN \\
+\midrule
+Public cause F1$_w$ & 0.9707 & 0.9532 \\
+59-node hidden-target acc. & 0.8846 & 1.0000 \\
+59-node simult. cause acc. & 0.8485 & 0.8788 \\
+Propagation traces & No & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{graphs/synthetic_scaleup_performance.png}
+\caption{Supplementary 59-node synthetic Clos stress study showing hidden-target localization, simultaneous-fault accuracy, and inference cost.}
+\label{fig:scaleup}
+\end{figure}
+
+The synthetic scale-up study is not presented as a replacement for the public benchmark. Its purpose is narrower: to test whether the same RCA design remains interpretable and operationally lightweight when the topology grows from 11 nodes to a larger 59-node Clos fabric and the fault process becomes more entangled. Figure~\ref{fig:scaleup} shows that even at this larger scale, batch inference stays below 0.12\,ms per window and above 8.4k windows/s for the full STGNN.
 
 The remediation layer reaches 0.8485 action-match rate, 0.8485 safety-pass rate, and blocks 100\% of mismatched unsafe actions on held-out anomalous windows. In the counterfactual recovery twin, the same gated actions improve mean service reachability from 0.9740 in the injected-fault state to 1.0000 after recovery, reduce mean blast radius by 0.0260, and achieve 0.8182 recovery-success rate. In other words, the gate does not merely mirror the classifier. It suppresses bad actions, and the digital twin translates that suppression into measurable recovery outcomes.
 
@@ -160,13 +211,33 @@ The remediation layer reaches 0.8485 action-match rate, 0.8485 safety-pass rate,
 \label{fig:digitaltwin}
 \end{figure}
 
+\subsection{Real Failure Case Study}
+We also include a concrete public case study based on scenario \texttt{S-200202\_2014\_evtmix-1}. This trace was collected from a controlled internal lab environment simulating enterprise traffic. The injected fault is an interface shutdown on \texttt{leaf4}. The full STGNN identifies both the correct cause and the correct target, and it does so 23.3\,s after the logged fault onset. The recovered propagation chain shows downstream activation on \texttt{leaf8} after 23.3\,s, \texttt{leaf7} after 83.3\,s, and \texttt{spine3} after 143.3\,s. This turns the benchmark from a static classification exercise into a systems-oriented RCA trace with a recoverable causal chain.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{graphs/topology_case_study.png}
+\caption{Public lab case study showing temporal detection and graph-based propagation tracing for the \texttt{leaf4} interface shutdown scenario.}
+\label{fig:casestudy}
+\end{figure}
+
+\subsection{Deployment and IDS Integration}
+Figure~\ref{fig:deployment} shows the intended deployment path. The RCA engine sits downstream from telemetry ingestion and optional anomaly or IDS signals, and upstream from operator display or remediation validation. This is the systems connection to the author's prior intrusion-detection work \cite{ramasahayam2026prediction}: an IDS or anomaly detector can surface the incident window, after which the temporal RCA engine localizes the root target, traces propagation, and forwards a cause-target pair to the safety gate and digital twin. In this sense, \textit{ClosRCA-Bench} is not only a benchmark but also a deployable middle layer between detection and response.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{graphs/datacenter_rca_deployment_pipeline.png}
+\caption{Deployment view for temporal RCA in a self-healing datacenter workflow.}
+\label{fig:deployment}
+\end{figure}
+
 \section{Discussion and Limitations}
 Three observations matter most. First, benchmark construction is the primary scientific contribution here. The value is not that the STGNN beats every baseline; it is that topology-aware and recovery-aware RCA can now be studied on public data with fixed artifacts and hidden-target labels. Second, the topology signal appears where it should: not in easy aggregate classification, but in localizing devices without direct telemetry. Third, the recovery twin makes remediation measurable. A paper about self-healing should report not only whether a classifier is correct, but whether the proposed action improves network state under a counterfactual replay.
 
-The current benchmark still has clear limits. It covers only eight scenarios from one lab topology. The network-loop scenario in the public repository was not included because the unpacked directory does not expose the per-device telemetry archives needed by the current parser. The recovery twin is a lightweight topology simulator rather than a controller-in-the-loop emulator such as containerlab or Batfish. Finally, strong classical baselines remain difficult to beat on the aggregate metrics, so future work should focus on harder scenarios, richer labels, and live-control validation.
+The current benchmark still has clear limits. It covers only eight scenarios from one lab topology. The network-loop scenario in the public repository was not included in the fixed benchmark split because the unpacked directory does not expose the per-device telemetry archives needed by the current parser. The compound-failure slice is therefore realistic but still modest; it reflects mixed-event operational traces rather than fully simultaneous multi-root incidents. The new 59-node synthetic scale-up study partially addresses scale and simultaneous-fault complexity, but it is still synthetic and therefore not a substitute for more public production-like traces. The recovery twin is a lightweight topology simulator rather than a controller-in-the-loop emulator such as containerlab or Batfish. Finally, strong classical baselines remain difficult to beat on the aggregate metrics, so future work should focus on harder scenarios, richer labels, live-control validation, and explicitly overlapping multi-failure traces.
 
 \section{Conclusion}
-This paper reframes the project around a stronger and more defensible thesis: public topology-grounded benchmarking plus counterfactual recovery validation for self-healing datacenter networks. \textit{ClosRCA-Bench} exposes hidden-target localization, supports reproducible anomaly and RCA evaluation, and measures remediation quality explicitly through both safety gating and a topology digital twin. The topology-aware STGNN is most useful where topology should matter most, namely hidden-target localization, while the recovery layer blocks unsafe actions and quantifies service restoration. The next step is to expand the benchmark with additional public scenarios and validate the action layer against a live network emulator.
+This work provides, to our knowledge, the first public, topology-grounded, recovery-aware RCA benchmark for datacenter networks. It reframes the project around a stronger and more defensible thesis: public topology-grounded benchmarking plus temporal RCA tracking and counterfactual recovery validation for self-healing datacenter networks. \textit{ClosRCA-Bench} exposes hidden-target localization, supports reproducible anomaly and RCA evaluation, reports detection delay and propagation traces, and measures remediation quality explicitly through both safety gating and a topology digital twin. The topology-aware STGNN is most useful where topology should matter most, namely hidden-target localization, simultaneous-fault tracking, and fast temporal tracking, while the recovery layer blocks unsafe actions and quantifies service restoration. The next step is to expand the benchmark with additional public scenarios, more severe multi-root failures, and live integration with emulated or production-like control loops.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

@@ -57,6 +57,11 @@ def write_snapshot_json() -> Path:
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
     metadata = pd.read_csv(TOPOLOGY_PROCESSED_DIR / "window_metadata.csv")
     leaderboard = pd.read_csv(RESULTS_DIR / "closrca_bench_leaderboard.csv")
+    temporal_summary = pd.read_csv(RESULTS_DIR / "topology_benchmark_temporal_summary.csv")
+    multi_failure = pd.read_csv(RESULTS_DIR / "topology_benchmark_multi_failure.csv")
+    case_study = pd.read_csv(RESULTS_DIR / "topology_benchmark_case_study.csv")
+    scaleup_summary_path = RESULTS_DIR / "synthetic_scaleup_summary.csv"
+    why_graph_path = RESULTS_DIR / "why_graph_model.csv"
     X = np.load(TOPOLOGY_PROCESSED_DIR / "X_topology.npy")
     y_anomaly = np.load(TOPOLOGY_PROCESSED_DIR / "y_topology_anomaly.npy")
     y_cause = np.load(TOPOLOGY_PROCESSED_DIR / "y_topology_cause.npy")
@@ -82,7 +87,14 @@ def write_snapshot_json() -> Path:
             for label, count in zip(*np.unique(y_target, return_counts=True))
         },
         "top_results": leaderboard.to_dict(orient="records"),
+        "temporal_tracking": temporal_summary.to_dict(orient="records"),
+        "compound_failure_slice": multi_failure.to_dict(orient="records"),
+        "case_study": case_study.to_dict(orient="records"),
     }
+    if scaleup_summary_path.exists():
+        snapshot["synthetic_scaleup"] = pd.read_csv(scaleup_summary_path).to_dict(orient="records")
+    if why_graph_path.exists():
+        snapshot["why_graph_model"] = pd.read_csv(why_graph_path).to_dict(orient="records")
 
     snapshot_path = EXAMPLES_DIR / "closrca_bench_snapshot.json"
     snapshot_path.write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
@@ -138,10 +150,22 @@ def build_release_zip(version: str) -> Path:
         Path("results/topology_benchmark_cause.csv"),
         Path("results/topology_benchmark_target.csv"),
         Path("results/topology_benchmark_target_slices.csv"),
+        Path("results/topology_benchmark_temporal_summary.csv"),
+        Path("results/topology_benchmark_multi_failure.csv"),
+        Path("results/topology_benchmark_positioning.csv"),
+        Path("results/topology_benchmark_case_study.csv"),
+        Path("results/topology_benchmark_propagation_traces.csv"),
         Path("results/topology_benchmark_remediation.csv"),
         Path("results/topology_benchmark_digital_twin.csv"),
+        Path("results/synthetic_scaleup_summary.csv"),
+        Path("results/why_graph_model.csv"),
         Path("graphs/topology_model_comparison.png"),
         Path("graphs/topology_target_cm.png"),
+        Path("graphs/topology_detection_delay.png"),
+        Path("graphs/topology_multi_failure.png"),
+        Path("graphs/topology_case_study.png"),
+        Path("graphs/synthetic_scaleup_performance.png"),
+        Path("graphs/datacenter_rca_deployment_pipeline.png"),
         Path("graphs/topology_digital_twin_recovery.png"),
         Path("examples/closrca_bench_sample_windows.csv"),
         Path("examples/closrca_bench_snapshot.json"),
@@ -151,7 +175,8 @@ def build_release_zip(version: str) -> Path:
 
     with ZipFile(zip_path, "w", compression=ZIP_DEFLATED) as archive:
         for path in include_paths:
-            archive.write(path, arcname=path.as_posix())
+            if path.exists():
+                archive.write(path, arcname=path.as_posix())
 
     return zip_path
 

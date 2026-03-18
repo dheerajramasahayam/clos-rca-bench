@@ -1,0 +1,5 @@
+scenario,root_target,impacted_node,propagation_path,activation_delay_seconds,peak_z_score
+S-200202_2014_evtmix-1,leaf4,leaf8,leaf4 -> dr03 -> leaf8,23.28437900543213,2.9541079998016357
+S-200202_2014_evtmix-1,leaf4,leaf7,leaf4 -> spine2 -> leaf7,83.28437900543213,2.0747907161712646
+S-200202_2014_evtmix-1,leaf4,spine3,leaf4 -> spine3,143.28437900543213,10.477821350097656
+S-200202_2014_evtmix-1,leaf4,leaf5,leaf4 -> spine2 -> leaf5,503.28437900543213,2.540382146835327
